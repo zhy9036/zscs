@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: zscaler-migration-postgres
+    environment:
+      POSTGRES_USER: zscaler
+      POSTGRES_PASSWORD: zscaler_dev_password
+      POSTGRES_DB: zscaler_migration
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zscaler -d zscaler_migration"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
