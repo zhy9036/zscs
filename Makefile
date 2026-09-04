@@ -41,8 +41,9 @@ deploy-frontend: generate-cert
 	@sudo chmod 600 $(NGINX_SSL_DIR)/zscaler.key
 	@sudo chmod 644 $(NGINX_SSL_DIR)/zscaler.crt
 	@echo "[deploy-frontend] copying frontend build to $(NGINX_WEB_ROOT)..."
+	@sudo rm -rf $(NGINX_WEB_ROOT)
 	@sudo mkdir -p $(NGINX_WEB_ROOT)
-	@sudo rsync -a --delete $(BUILD_DIR)/frontend/ $(NGINX_WEB_ROOT)/
+	@sudo cp -a $(BUILD_DIR)/frontend/. $(NGINX_WEB_ROOT)/
 	@echo "[deploy-frontend] testing nginx config..."
 	@sudo nginx -t
 	@echo "[deploy-frontend] starting nginx..."
