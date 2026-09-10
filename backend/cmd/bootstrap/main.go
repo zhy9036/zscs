@@ -107,26 +107,25 @@ func main() {
 	err = pool.QueryRow(ctx, `SELECT id FROM users WHERE username = $1`, demoUser).Scan(&userID)
 	if err == nil {
 		fmt.Printf("user %q already exists (id=%s)\n", demoUser, userID)
-		return
-	}
-	if err != pgx.ErrNoRows {
+	} else if err == pgx.ErrNoRows {
+		hash, err := auth.HashPassword(demoPass)
+		if err != nil {
+			log.Fatalf("hash password: %v", err)
+		}
+
+		err = pool.QueryRow(ctx,
+			`INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id`,
+			demoUser, hash,
+		).Scan(&userID)
+		if err != nil {
+			log.Fatalf("create demo user: %v", err)
+		}
+
+		fmt.Printf("seeded user %q (id=%s)\n", demoUser, userID)
+	} else {
 		log.Fatalf("lookup user: %v", err)
 	}
 
-	hash, err := auth.HashPassword(demoPass)
-	if err != nil {
-		log.Fatalf("hash password: %v", err)
-	}
-
-	err = pool.QueryRow(ctx,
-		`INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id`,
-		demoUser, hash,
-	).Scan(&userID)
-	if err != nil {
-		log.Fatalf("create demo user: %v", err)
-	}
-
-	fmt.Printf("seeded user %q (id=%s)\n", demoUser, userID)
 	fmt.Println("\nLogin credentials:")
 	fmt.Printf("  username: %s\n  password: %s\n", demoUser, demoPass)
 
