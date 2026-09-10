@@ -15,7 +15,7 @@ import (
 const (
 	pgURL    = "postgres://postgres@127.0.0.1:5432/postgres?sslmode=disable"
 	dbName   = "zscaler_migration"
-	dbURL    = "postgres://postgres@127.0.0.1:5432/zscaler_migration?sslmode=disable"
+	dbURL    = "postgres://zscaler:zscaler@localhost:5432/zscaler_migration?sslmode=disable"
 	demoUser = "demo"
 	demoPass = "demo123"
 )
