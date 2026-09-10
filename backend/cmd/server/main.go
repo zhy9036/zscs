@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -19,6 +20,10 @@ import (
 
 func main() {
 	zerolog.TimeFieldFormat = time.RFC3339
+
+	if err := godotenv.Load(); err != nil {
+		log.Warn().Err(err).Msg("no .env file loaded, relying on environment")
+	}
 
 	cfg, err := config.Load()
 	if err != nil {
