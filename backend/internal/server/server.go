@@ -37,7 +37,7 @@ func New(cfg config.Config, pool *pgxpool.Pool) http.Handler {
 	// Services
 	tokenMgr := auth.NewTokenManager(cfg.JWTSecret, cfg.JWTExpiration)
 	authService := auth.NewService(userRepo, tokenMgr, cfg.EnableDevRegister)
-	fileService := file.NewService(storage, fileRepo, cfg.MaxUploadSize)
+	fileService := file.NewService(storage, fileRepo, cfg.MaxUploadSize, projectRepo)
 	projectService := project.NewService(projectRepo, fileService)
 	agentService := agent.NewMock()
 	messageService := message.NewService(messageRepo, projectRepo, agentService)

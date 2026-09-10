@@ -107,3 +107,8 @@ func (r *Repository) Touch(ctx context.Context, userID, id string) error {
 	_, err := r.pool.Exec(ctx, `UPDATE projects SET updated_at = now() WHERE id = $1 AND user_id = $2`, id, userID)
 	return err
 }
+
+func (r *Repository) EnsureOwned(ctx context.Context, userID, projectID string) error {
+	_, err := r.GetByID(ctx, userID, projectID)
+	return err
+}

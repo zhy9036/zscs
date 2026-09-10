@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/zscaler/migration-platform/backend/internal/auth"
 	"github.com/zscaler/migration-platform/backend/internal/httperr"
 )
 
@@ -18,6 +19,7 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
+	userID := auth.UserIDFromContext(r.Context())
 	projectID := chi.URLParam(r, "projectID")
 	fileID := chi.URLParam(r, "fileID")
 	if projectID == "" || fileID == "" {
@@ -25,7 +27,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	f, rc, err := h.service.Get(r.Context(), projectID, fileID)
+	f, rc, err := h.service.Get(r.Context(), userID, projectID, fileID)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
 			httperr.NotFound(w)
@@ -46,6 +48,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
+	userID := auth.UserIDFromContext(r.Context())
 	projectID := chi.URLParam(r, "projectID")
 	fileID := chi.URLParam(r, "fileID")
 	if projectID == "" || fileID == "" {
@@ -53,7 +56,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.service.Delete(r.Context(), projectID, fileID); err != nil {
+	if err := h.service.Delete(r.Context(), userID, projectID, fileID); err != nil {
 		if errors.Is(err, ErrNotFound) {
 			httperr.NotFound(w)
 			return

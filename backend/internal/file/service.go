@@ -35,17 +35,30 @@ var allowedContentTypes = map[string]bool{
 	"text/csv":                  true,
 }
 
-type Service struct {
-	storage       FileStorage
-	repo          *Repository
-	maxUploadSize int64
+type ProjectOwnershipChecker interface {
+	EnsureOwned(ctx context.Context, userID, projectID string) error
 }
 
-func NewService(storage FileStorage, repo *Repository, maxUploadSize int64) *Service {
+type Repo interface {
+	Create(ctx context.Context, f File) (File, error)
+	GetByID(ctx context.Context, projectID, id string) (File, error)
+	ListByProject(ctx context.Context, projectID string) ([]File, error)
+	Delete(ctx context.Context, projectID, id string) error
+}
+
+type Service struct {
+	storage       FileStorage
+	repo          Repo
+	maxUploadSize int64
+	ownership     ProjectOwnershipChecker
+}
+
+func NewService(storage FileStorage, repo Repo, maxUploadSize int64, ownership ProjectOwnershipChecker) *Service {
 	return &Service{
 		storage:       storage,
 		repo:          repo,
 		maxUploadSize: maxUploadSize,
+		ownership:     ownership,
 	}
 }
 
@@ -85,7 +98,10 @@ func (s *Service) Upload(ctx context.Context, in UploadInput) (File, error) {
 	return f, nil
 }
 
-func (s *Service) Get(ctx context.Context, projectID, id string) (File, io.ReadCloser, error) {
+func (s *Service) Get(ctx context.Context, userID, projectID, id string) (File, io.ReadCloser, error) {
+	if err := s.ownership.EnsureOwned(ctx, userID, projectID); err != nil {
+		return File{}, nil, ErrNotFound
+	}
 	f, err := s.repo.GetByID(ctx, projectID, id)
 	if err != nil {
 		return File{}, nil, err
@@ -101,7 +117,10 @@ func (s *Service) ListByProject(ctx context.Context, projectID string) ([]File, 
 	return s.repo.ListByProject(ctx, projectID)
 }
 
-func (s *Service) Delete(ctx context.Context, projectID, id string) error {
+func (s *Service) Delete(ctx context.Context, userID, projectID, id string) error {
+	if err := s.ownership.EnsureOwned(ctx, userID, projectID); err != nil {
+		return ErrNotFound
+	}
 	f, err := s.repo.GetByID(ctx, projectID, id)
 	if err != nil {
 		return err
