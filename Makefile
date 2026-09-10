@@ -44,6 +44,10 @@ deploy-frontend: generate-cert
 	@sudo rm -rf $(NGINX_WEB_ROOT)
 	@sudo mkdir -p $(NGINX_WEB_ROOT)
 	@sudo cp -a $(BUILD_DIR)/frontend/. $(NGINX_WEB_ROOT)/
+	@echo "[deploy-frontend] fixing ownership and permissions..."
+	@sudo chown -R nobody:nogroup $(NGINX_WEB_ROOT)
+	@sudo find $(NGINX_WEB_ROOT) -type d -exec chmod 755 {} \;
+	@sudo find $(NGINX_WEB_ROOT) -type f -exec chmod 644 {} \;
 	@echo "[deploy-frontend] testing nginx config..."
 	@sudo nginx -t
 	@echo "[deploy-frontend] starting nginx..."
