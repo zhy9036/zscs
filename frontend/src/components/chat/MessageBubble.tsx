@@ -17,9 +17,9 @@ export function MessageBubble({ message }: { message: Message }) {
         }`}
       >
         {isUser ? (
-          <p className="whitespace-pre-wrap">{message.content}</p>
+          <p className="whitespace-pre-wrap break-words">{message.content}</p>
         ) : (
-          <div className="prose prose-sm max-w-none">
+          <div className="max-w-none space-y-2 [&_p]:whitespace-pre-wrap [&_p]:break-words [&_pre]:overflow-x-auto [&_pre]:rounded-md [&_pre]:bg-gray-50 [&_pre]:p-3 [&_pre]:text-xs [&_code]:break-words [&_li]:break-words">
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
         )}
